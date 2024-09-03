@@ -115,9 +115,11 @@ import EditForm from '@/views/toolbox/generator/components/EditForm.vue'
 import { useDebounceFn } from '@vueuse/core'
 import { isLocalEnv } from '@/utils'
 import { useDownload } from '@/hooks/useDownload'
+import { useDownloadFetch } from '@/hooks/useDownloadFetch'
 import Preview from '@/views/toolbox/generator/components/Preview.vue'
 import SvgIcon from '@/components/SvgIcon/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {ADMIN_MODULE} from "@/api/helper/prefix";
 
 defineOptions({
   name: 'Generator'
@@ -213,14 +215,22 @@ const codeGene = (row: IGenerator.Info) => {
 
 // 压缩文件下载
 const download = (row: IGenerator.Info) => {
-  useDownload(
-    downloadZip,
+/*  useDownload(
+      downloadZip,
     'sz-admin-' + row.tableName,
     { tableNames: [row.tableName] },
     true,
     '.zip'
+  )*/
+  useDownloadFetch(
+      `http://127.0.0.1:9991/api/admin/generator/zip/${row.tableName}`,
+       row.tableName,
+      { },
+      true,
+      '.zip'
   )
 }
+
 // 删除
 const delGene = (row: IGenerator.Info) => {
   ElMessageBox.confirm('您是否确认删除?', '温馨提示', {
