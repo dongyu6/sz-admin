@@ -222,9 +222,10 @@ const download = (row: IGenerator.Info) => {
     true,
     '.zip'
   )*/
+  const url = `${ADMIN_MODULE}/generator/zip/${row.tableName}`
   useDownloadFetch(
-      `http://127.0.0.1:9991/api/admin/generator/zip/${row.tableName}`,
-       row.tableName,
+      url,
+      row.tableName,
       { },
       true,
       '.zip'
