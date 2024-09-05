@@ -1,6 +1,7 @@
 import {ElNotification} from "element-plus";
 import StreamSaver from 'streamsaver';
 import { useUserStore } from '@/stores/modules/user'
+import {ADMIN_MODULE} from "@/api/helper/prefix";
 
 export const useDownloadFetch = async (
   api: string,
@@ -21,7 +22,7 @@ export const useDownloadFetch = async (
   try {
     // 将对象转为 URL 查询字符串
     const queryString = new URLSearchParams(params).toString();
-    const url = queryString ? `${api}?${queryString}` : api; // 拼接成完整的 URL
+    const url = queryString ? `${ADMIN_MODULE}${api}?${queryString}` : api; // 拼接成完整的 URL
     const userStore = useUserStore()
     // 使用 Fetch API 发送 GET 请求获取流数据
     const response = await fetch(url, {

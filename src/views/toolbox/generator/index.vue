@@ -107,19 +107,16 @@ import {
   deleteGenerator,
   getGeneratorList,
   saveGenerator,
-  downloadZip,
   checkDisk
 } from '@/api/modules/toolbox/generator'
 import Import from '@/views/toolbox/generator/components/Import.vue'
 import EditForm from '@/views/toolbox/generator/components/EditForm.vue'
 import { useDebounceFn } from '@vueuse/core'
 import { isLocalEnv } from '@/utils'
-import { useDownload } from '@/hooks/useDownload'
 import { useDownloadFetch } from '@/hooks/useDownloadFetch'
 import Preview from '@/views/toolbox/generator/components/Preview.vue'
 import SvgIcon from '@/components/SvgIcon/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {ADMIN_MODULE} from "@/api/helper/prefix";
 
 defineOptions({
   name: 'Generator'
@@ -222,11 +219,11 @@ const download = (row: IGenerator.Info) => {
     true,
     '.zip'
   )*/
-  const url = `${ADMIN_MODULE}/generator/zip/${row.tableName}`
+  const url = `/generator/zip`
   useDownloadFetch(
       url,
       row.tableName,
-      { },
+      {tableName: row.tableName},
       true,
       '.zip'
   )
