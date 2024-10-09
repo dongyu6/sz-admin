@@ -179,7 +179,6 @@ const showSqlInfo = async (row: any = {}) => {
 </script>
 <style lang="scss" scoped>
 .sql-box {
-  text-align: center;
   margin: 0 auto;
   width: 90%;
   max-height: 60vh;
