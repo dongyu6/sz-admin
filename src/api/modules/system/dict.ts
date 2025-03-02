@@ -67,7 +67,7 @@ export const editDictData = (params: IDict.Dict) => {
 };
 
 /**
- * 删除字d典
+ * 删除字典
  * @param params
  * @returns {*}
  */
@@ -93,4 +93,15 @@ export const getDictTypeOptions = () => {
  */
 export const exportDictSql = (params: { ids: number[] }) => {
   return http.post<string>(ADMIN_MODULE + `/sys-dict/sql/export`, params);
+};
+
+/**
+ * 获取指定字典
+ * @param params
+ * @returns {*}
+ */
+export const getDictByCode = (params: { typeCode: string[] }) => {
+  const searchParams = new URLSearchParams();
+  params.typeCode.forEach(code => searchParams.append('typeCode', code));
+  return http.get<Record<string, IDict.DictCustom[]>>(ADMIN_MODULE + `/sys-dict/code?${searchParams.toString()}`);
 };
