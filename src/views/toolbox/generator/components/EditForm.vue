@@ -429,11 +429,14 @@
                   v-model="generatorInfo.parentMenuId"
                   :data="parentMenus"
                   check-strictly
+                  node-key="id"
                   placeholder="请选择上级"
                   :render-after-expand="false"
                   clearable
                   :default-expand-all="true"
                   :props="treeProps"
+                  @change="treeSelectChange"
+                  ref="parentTreeRef"
                 />
               </el-form-item>
             </el-col>
@@ -505,12 +508,12 @@
 <script lang="ts" setup>
 import ProTable from '@/components/ProTable/index.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
-import type { IGenerator } from '@/api/interface/toolbox/generator';
+import type { GeneratorBaseInfo, GeneratorColumnInfo, GeneratorGeneratorInfo } from '@/api/types/toolbox/generator';
 import { getGeneratorInfo } from '@/api/modules/toolbox/generator';
 import { dictShowWayOptions, htmlTypeOptions, javaTypeOptions, queryTypeOptions } from '@/views/toolbox/generator/common/Options';
 import { getDictTypeOptions } from '@/api/modules/system/dict';
-import type { IDict } from '@/api/interface/system/dict';
-import type { IMenu } from '@/api/interface/system/menu';
+import type { DictCategory, DictType, DictOption } from '@/api/types/system/dict';
+import type { MenuTree } from '@/api/types/system/menu';
 import { getMenuTree } from '@/api/modules/system/menu';
 import { ref, watchEffect } from 'vue';
 import { ElMessage } from 'element-plus';
@@ -518,8 +521,8 @@ import { ElMessage } from 'element-plus';
 defineOptions({
   name: 'EditForm'
 });
-const columnsInfos = ref<IGenerator.ColumnInfo[]>([]);
-const generatorInfo = ref<IGenerator.GeneratorInfo>({
+const columnsInfos = ref<GeneratorColumnInfo[]>([]);
+const generatorInfo = ref<GeneratorGeneratorInfo>({
   businessName: '',
   functionName: '',
   moduleName: '',
@@ -538,29 +541,7 @@ const generatorInfo = ref<IGenerator.GeneratorInfo>({
 });
 const isShowExcel = ref<boolean>(true);
 
-// 表格配置项
-// const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
-//   { type: 'sort', width: 100, label: '拖拽排序' },
-//   { prop: 'columnName', label: '字段列名' },
-//   { prop: 'columnComment', label: '字段描述' },
-//   { prop: 'columnType', label: '物理类型' },
-//   { prop: 'javaType', label: 'Java类型' },
-//   { prop: 'isPk', label: '主键', width: 60 },
-//   { prop: 'isIncrement', label: '自增', width: 60 },
-//   { prop: 'isUniqueValid', label: '唯一', width: 80 },
-//   { prop: 'isRequired', label: '必填', width: 60 },
-//   { prop: 'isLogicDel', label: '逻辑删除', width: 120 },
-//   { prop: 'isInsert', label: '插入', width: 80 },
-//   { prop: 'isEdit', label: '编辑', width: 80 },
-//   { prop: 'isList', label: '列表', width: 80 },
-//   { prop: 'isQuery', label: '查询', width: 80 },
-//   { prop: 'isImport', label: '导入', width: 80 },
-//   { prop: 'isExport', label: '导出', width: 80 },
-//   { prop: 'queryType', label: '查询方式' },
-//   { prop: 'htmlType', label: '显示类型' },
-//   { prop: 'dictType', label: '字典类型' }
-// ]
-const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
+const columns = ref<ColumnProps<GeneratorColumnInfo>[]>([
   { type: 'sort', width: 75, label: '拖拽排序' },
   { prop: 'columnName', label: '字段列名' },
   { prop: 'columnComment', label: '字段描述' },
@@ -592,7 +573,7 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
-const dictTypeOptions = ref<IDict.DictCategory[]>([]);
+const dictTypeOptions = ref<DictCategory[]>([]);
 const getDictTypes = () => {
   getDictTypeOptions().then(res => {
     dictTypeOptions.value = processDictionary(res.data);
@@ -600,11 +581,11 @@ const getDictTypes = () => {
 };
 
 // 字典分组处理逻辑
-const processDictionary = (data: IDict.DictType[]): IDict.DictCategory[] => {
+const processDictionary = (data: DictType[]): DictCategory[] => {
   const categorizedDict = data.reduce<{
-    [key: string]: IDict.DictCategory;
+    [key: string]: DictCategory;
   }>((acc, item) => {
-    const option: IDict.DictOption = { value: item.typeCode, label: item.typeName };
+    const option: DictOption = { value: item.typeCode, label: item.typeName };
     const category = item.isDynamic ? '动态字典' : '静态字典';
 
     if (!acc[category]) {
@@ -624,7 +605,7 @@ const treeProps = {
   label: 'title',
   value: 'id'
 };
-const parentMenus = ref<IMenu.Tree[]>([]);
+const parentMenus = ref<MenuTree[]>([]);
 
 const loadParentMenus = () => {
   getMenuTree({}).then(res => {
@@ -636,7 +617,7 @@ loadParentMenus();
 
 const editProTableRef = ref<ProTableInstance>();
 
-const baseInfo = ref<IGenerator.BaseInfo>({
+const baseInfo = ref<GeneratorBaseInfo>({
   tableId: 0,
   tableName: '',
   tableComment: '',
@@ -773,6 +754,14 @@ const typeContent = ref<{
 
 const changeRadio = (val: string) => {
   isShowExcel.value = val === 'all' || val === 'server';
+};
+
+const parentTreeRef = ref();
+
+const treeSelectChange = () => {
+  if (parentTreeRef.value!.getCurrentNode().menuTypeCd === '1002001') {
+    generatorInfo.value.moduleName = parentTreeRef.value!.getCurrentNode().name;
+  }
 };
 
 defineExpose({
